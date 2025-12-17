@@ -1,7 +1,7 @@
-all: process_test
+all: process
 
-process_test: process_test.c
-	gcc -o process_test process_test.c
+process: process.c
+	gcc -o process process.c
 
 clean:
-	rm -f process_test
+	rm -f process
