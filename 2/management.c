@@ -26,7 +26,7 @@ void thread_management() {
         printf("fail to create thread 1, errno: %d\n", rc);
         exit(-1);
     }
-    printf("thread 1 is created，ID: %lu\n", (unsigned long)thread1);
+    printf("thread 1 is created, ID: %lu\n", (unsigned long)thread1);
     
     usleep(rand() % 200 * 1000);
     
@@ -35,7 +35,7 @@ void thread_management() {
         printf("fail to create thread 2, errno: %d\n", rc);
         exit(-1);
     }
-    printf("thread 2 is created，ID: %lu\n", (unsigned long)thread2);
+    printf("thread 2 is created, ID: %lu\n", (unsigned long)thread2);
     
     usleep(rand() % 200 * 1000);
     
