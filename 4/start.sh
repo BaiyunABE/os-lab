@@ -1,4 +1,5 @@
 #!/bin/bash
 make
-./production_line
+# ./production_line
+./process_resource
 make clean
