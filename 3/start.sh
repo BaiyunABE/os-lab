@@ -1,4 +1,5 @@
 #!/bin/bash
 make
-./msg_queue
+# ./msg_queue
+./share_mem
 make clean
