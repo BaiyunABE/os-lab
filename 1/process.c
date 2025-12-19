@@ -9,7 +9,23 @@
 #include <sched.h>	
 #include <errno.h>
 
+pid_t Fork(void) {
+    pid_t rv = fork();
+    if (rv == -1) {
+        perror("fork");
+        exit(EXIT_FAILURE);
+    }
+    return rv;
+}
 
+int Kill(pid_t pid, int sig) {
+    int rv = kill(pid, sig);
+    if (rv == -1) {
+        perror("kill");
+        exit(EXIT_FAILURE);
+    }
+    return rv;
+}
 
 void delay() {
   int delay_ms = (rand() % 291) + 10; // 10-300ms
@@ -59,17 +75,12 @@ int main(int argc, char* argv[]) {
   return 0;
 }
 
-
 void test_fork() {
   printf("\n=== test fork ===\n");
   
-  pid_t pid = fork();
+  pid_t pid = Fork();
   
-  if (pid < 0) {
-    perror("fork");
-    exit(EXIT_FAILURE);
-  }
-  else if (pid == 0) {
+  if (pid == 0) {
     printf("child process(PID=%d) start\n", getpid());
     
     for (int i = 1; i <= 3; i++) {
@@ -158,7 +169,7 @@ void test_clone() {
 void test_exec() {
   printf("\n=== test exec ===\n");
   
-  pid_t pid = fork();
+  pid_t pid = Fork();
   if (pid == 0) {
     printf("child process(PID=%d) start\n", getpid());
     
@@ -172,17 +183,14 @@ void test_exec() {
     
     perror("execve");
     exit(EXIT_FAILURE);
-  } else if (pid > 0) {
+  } else {
     printf("process(PID=%d) create child process(PID=%d)\n", getpid(), pid);
     
     sleep(1);
     
     printf("process(PID=%d) send signal SIGTERM to child process(PID=%d)\n", getpid(), pid);
-    if (kill(pid, SIGTERM) == 0) {
-      printf("kill success\n");
-    } else {
-      perror("kill");
-    }
+    Kill(pid, SIGTERM);
+    printf("kill success\n");
     
     int status;
     waitpid(pid, &status, 0);
@@ -195,7 +203,7 @@ void test_exec() {
 void test_kill() {
   printf("\n=== test kill ===\n");
   
-  pid_t pid = fork();
+  pid_t pid = Fork();
   
   if (pid == 0) {
     printf("child process(PID=%d) start\n", getpid());
@@ -209,7 +217,7 @@ void test_kill() {
         exit(EXIT_SUCCESS);
       }
     }
-  } else if (pid > 0) {
+  } else {
     printf("process(PID=%d) create child process(PID=%d)\n", getpid(), pid);
     
     sleep(1);
