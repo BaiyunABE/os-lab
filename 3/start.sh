@@ -1,5 +1,5 @@
 #!/bin/bash
 make
-# ./msg_queue
-./share_mem
+./msg/start.sh
+./shm/start.sh
 make clean
