@@ -16,7 +16,7 @@ struct message {
 #define MSG_TYPE 1
 
 pid_t Fork(void) {
-    int rv = fork();
+    pid_t rv = fork();
     if (rv == -1) {
         perror("fork");
         exit(EXIT_FAILURE);
