@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <pthread.h>
 #include <semaphore.h>
 #include <unistd.h>
@@ -26,6 +27,18 @@ sem_t condC;
 volatile bool waitingA = false;
 volatile bool waitingB = false;
 volatile bool waitingC = false;
+
+void posix_error(int code, char *msg) {
+    fprintf(stderr, "%s: %s\n", msg, strerror(code));
+    exit(EXIT_FAILURE);
+}
+
+void Pthread_create(pthread_t *thread, const pthread_attr_t *attr, void *(*start_routine) (void *), void *arg) {
+    int rv = pthread_create(thread, attr, start_routine, arg);
+    if (rv != 0) {
+        posix_error(rv, "pthread_create");
+    }
+}
 
 void* workerA(void*) {
     while (1) {
@@ -166,20 +179,9 @@ int main() {
     sem_init(&condB, 0, 0);
     sem_init(&condC, 0, 0);
     
-    if (pthread_create(&threadA, NULL, workerA, NULL) != 0) {
-        perror("failed to create A");
-        return EXIT_FAILURE;
-    }
-
-    if (pthread_create(&threadB, NULL, workerB, NULL) != 0) {
-        perror("failed to create B");
-        return EXIT_FAILURE;
-    }
-    
-    if (pthread_create(&threadC, NULL, workerC, NULL) != 0) {
-        perror("failed to create C");
-        return EXIT_FAILURE;
-    }
+    Pthread_create(&threadA, NULL, workerA, NULL);
+    Pthread_create(&threadB, NULL, workerB, NULL);
+    Pthread_create(&threadC, NULL, workerC, NULL);
 
     pthread_join(threadA, NULL);
     pthread_join(threadB, NULL);

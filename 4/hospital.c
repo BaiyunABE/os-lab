@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <pthread.h>
 #include <semaphore.h>
 #include <unistd.h>
@@ -22,6 +23,18 @@ int patient_counter = 0;
 int treated_patients = 0;
 int waiting_room[N];
 int wr_front = 0, wr_rear = 0;
+
+void posix_error(int code, char *msg) {
+    fprintf(stderr, "%s: %s\n", msg, strerror(code));
+    exit(EXIT_FAILURE);
+}
+
+void Pthread_create(pthread_t *thread, const pthread_attr_t *attr, void *(*start_routine) (void *), void *arg) {
+    int rv = pthread_create(thread, attr, start_routine, arg);
+    if (rv != 0) {
+        posix_error(rv, "pthread_create");
+    }
+}
 
 void* patient(void* arg) {
     int patient_id = (int)(long)arg;
@@ -142,11 +155,11 @@ int main() {
     }
     
     for(int i = 0; i < M; i++) {
-        pthread_create(&doctor_threads[i], NULL, doctor, (void *)(long)i);
+        Pthread_create(&doctor_threads[i], NULL, doctor, (void *)(long)i);
     }
     
     for(int i = 0; i < TOTAL_PATIENTS; i++) {
-        pthread_create(&patient_threads[i], NULL, patient, (void *)(long)i);
+        Pthread_create(&patient_threads[i], NULL, patient, (void *)(long)i);
         
         int interval = rand() % 100000;
         usleep(interval);

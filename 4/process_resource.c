@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <pthread.h>
 #include <semaphore.h>
 #include <unistd.h>
@@ -20,6 +21,18 @@ typedef struct {
     int id;
     int iterations;
 } process_data_t;
+
+void posix_error(int code, char *msg) {
+    fprintf(stderr, "%s: %s\n", msg, strerror(code));
+    exit(EXIT_FAILURE);
+}
+
+void Pthread_create(pthread_t *thread, const pthread_attr_t *attr, void *(*start_routine) (void *), void *arg) {
+    int rv = pthread_create(thread, attr, start_routine, arg);
+    if (rv != 0) {
+        posix_error(rv, "pthread_create");
+    }
+}
 
 void use_resources(int pid, int iteration) {
     printf("Process P%d (iteration %d) using 1 page and 1 I/O device\n", 
@@ -118,10 +131,7 @@ void run_processes(int iterations_per_process) {
         data->id = i;
         data->iterations = iterations_per_process;
         
-        if (pthread_create(&threads[i], NULL, process_function, data) != 0) {
-            perror("Failed to create thread");
-            exit(EXIT_FAILURE);
-        }
+        Pthread_create(&threads[i], NULL, process_function, data);
     }
     
     for (int i = 0; i < NUM_PROCESSES; i++) {

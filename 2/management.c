@@ -5,6 +5,18 @@
 #include <string.h>
 #include <time.h>
 
+void posix_error(int code, char *msg) {
+    fprintf(stderr, "%s: %s\n", msg, strerror(code));
+    exit(EXIT_FAILURE);
+}
+
+void Pthread_create(pthread_t *thread, const pthread_attr_t *attr, void *(*start_routine) (void *), void *arg) {
+    int rv = pthread_create(thread, attr, start_routine, arg);
+    if (rv != 0) {
+        posix_error(rv, "pthread_create");
+    }
+}
+
 void* thread_func1(void* arg);
 void* thread_func2(void* arg);
 void* thread_func3(void* arg);
@@ -21,29 +33,17 @@ void thread_management() {
     pthread_t main_thread = pthread_self();
     printf("main thread ID: %lu\n", (unsigned long)main_thread);
     
-    rc = pthread_create(&thread1, NULL, thread_func1, (void*)"thread 1");
-    if (rc) {
-        printf("fail to create thread 1, errno: %d\n", rc);
-        exit(-1);
-    }
+    Pthread_create(&thread1, NULL, thread_func1, (void*)"thread 1");
     printf("thread 1 is created, ID: %lu\n", (unsigned long)thread1);
     
     usleep(rand() % 200 * 1000);
     
-    rc = pthread_create(&thread2, NULL, thread_func2, (void*)"thread 2");
-    if (rc) {
-        printf("fail to create thread 2, errno: %d\n", rc);
-        exit(-1);
-    }
+    Pthread_create(&thread2, NULL, thread_func2, (void*)"thread 2");
     printf("thread 2 is created, ID: %lu\n", (unsigned long)thread2);
     
     usleep(rand() % 200 * 1000);
     
-    rc = pthread_create(&thread3, NULL, thread_func3, (void*)"thread 3");
-    if (rc) {
-        printf("fail to create thread 3, errno: %d\n", rc);
-        exit(-1);
-    }
+    Pthread_create(&thread3, NULL, thread_func3, (void*)"thread 3");
     printf("thread 3 is created, ID: %lu\n", (unsigned long)thread3);
     
     usleep(rand() % 200 * 1000);

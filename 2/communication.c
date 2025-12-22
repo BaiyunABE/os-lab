@@ -5,6 +5,18 @@
 #include <string.h>
 #include <time.h>
 
+void posix_error(int code, char *msg) {
+    fprintf(stderr, "%s: %s\n", msg, strerror(code));
+    exit(EXIT_FAILURE);
+}
+
+void Pthread_create(pthread_t *thread, const pthread_attr_t *attr, void *(*start_routine) (void *), void *arg) {
+    int rv = pthread_create(thread, attr, start_routine, arg);
+    if (rv != 0) {
+        posix_error(rv, "pthread_create");
+    }
+}
+
 char shared_message[100] = "init";
 
 void* communication_thread1(void* arg) {
@@ -45,21 +57,11 @@ void thread_communication() {
     printf("  shared message: %s\n", shared_message);
     
     pthread_t comm_thread1, comm_thread2;
-    int rc;
     void* thread1_result;
     void* thread2_result;
     
-    rc = pthread_create(&comm_thread1, NULL, communication_thread1, (void*)"thread 1");
-    if (rc) {
-        printf("failed to create thread 1, errno: %d\n", rc);
-        return;
-    }
-    
-    rc = pthread_create(&comm_thread2, NULL, communication_thread2, (void*)"thread 2");
-    if (rc) {
-        printf("failed to create thread 2, errno: %d\n", rc);
-        return;
-    }
+    Pthread_create(&comm_thread1, NULL, communication_thread1, (void*)"thread 1");
+    Pthread_create(&comm_thread2, NULL, communication_thread2, (void*)"thread 2");
     
     pthread_join(comm_thread1, &thread1_result);
     pthread_join(comm_thread2, &thread2_result);

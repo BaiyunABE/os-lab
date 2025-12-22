@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <pthread.h>
 #include <semaphore.h>
 
@@ -17,6 +19,18 @@ struct orange {
     int a[ORANGE_MAX_VALUE];
     int b[ORANGE_MAX_VALUE];
 };
+
+void posix_error(int code, char *msg) {
+    fprintf(stderr, "%s: %s\n", msg, strerror(code));
+    exit(EXIT_FAILURE);
+}
+
+void Pthread_create(pthread_t *thread, const pthread_attr_t *attr, void *(*start_routine) (void *), void *arg) {
+    int rv = pthread_create(thread, attr, start_routine, arg);
+    if (rv != 0) {
+        posix_error(rv, "pthread_create");
+    }
+}
 
 void* calc_a(void* arg) {
     struct apple* test = arg;
@@ -65,9 +79,9 @@ int main() {
 
     sem_init(&mutex, 0, 1);
 
-    pthread_create(&thread1, NULL, calc_a, (void*)&test);
-    pthread_create(&thread2, NULL, calc_b, (void*)&test);
-    pthread_create(&thread3, NULL, calc_orange, (void*)&test1);
+    Pthread_create(&thread1, NULL, calc_a, (void*)&test);
+    Pthread_create(&thread2, NULL, calc_b, (void*)&test);
+    Pthread_create(&thread3, NULL, calc_orange, (void*)&test1);
 
     pthread_join(thread1, NULL);
     pthread_join(thread2, NULL);
