@@ -40,6 +40,13 @@ void Pthread_join(pthread_t thread, void **retval) {
     }
 }
 
+void Sem_init(sem_t *sem, int pshared, unsigned int value) {
+    int rv = sem_init(sem, pshared, value);
+    if (rv != 0) {
+        perror("sem_init");
+    }
+}
+
 void* calc_a(void* arg) {
     struct apple* test = arg;
     unsigned long long sum;
@@ -85,7 +92,7 @@ int main() {
 
     unsigned long long sum;
 
-    sem_init(&mutex, 0, 1);
+    Sem_init(&mutex, 0, 1);
 
     Pthread_create(&thread1, NULL, calc_a, (void*)&test);
     Pthread_create(&thread2, NULL, calc_b, (void*)&test);

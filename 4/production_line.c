@@ -47,6 +47,13 @@ void Pthread_join(pthread_t thread, void **retval) {
     }
 }
 
+void Sem_init(sem_t *sem, int pshared, unsigned int value) {
+    int rv = sem_init(sem, pshared, value);
+    if (rv != 0) {
+        perror("sem_init");
+    }
+}
+
 void* workerA(void*) {
     while (1) {
         sem_wait(&mutexE);
@@ -179,12 +186,12 @@ void* workerC(void*) {
 int main() {
     pthread_t threadA, threadB, threadC;
     
-    sem_init(&mutexA, 0, 1);
-    sem_init(&mutexB, 0, 1);
-    sem_init(&mutexE, 0, 1);
-    sem_init(&condA, 0, 0);
-    sem_init(&condB, 0, 0);
-    sem_init(&condC, 0, 0);
+    Sem_init(&mutexA, 0, 1);
+    Sem_init(&mutexB, 0, 1);
+    Sem_init(&mutexE, 0, 1);
+    Sem_init(&condA, 0, 0);
+    Sem_init(&condB, 0, 0);
+    Sem_init(&condC, 0, 0);
     
     Pthread_create(&threadA, NULL, workerA, NULL);
     Pthread_create(&threadB, NULL, workerB, NULL);

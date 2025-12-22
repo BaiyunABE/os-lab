@@ -43,6 +43,13 @@ void Pthread_join(pthread_t thread, void **retval) {
     }
 }
 
+void Sem_init(sem_t *sem, int pshared, unsigned int value) {
+    int rv = sem_init(sem, pshared, value);
+    if (rv != 0) {
+        perror("sem_init");
+    }
+}
+
 void* patient(void* arg) {
     int patient_id = (int)(long)arg;
     
@@ -146,12 +153,12 @@ int main() {
     
     srand(time(NULL));
     
-    sem_init(&max_patients, 0, N);
-    sem_init(&mutex_doctor, 0, 1);
-    sem_init(&mutex_patient, 0, 1);
-    sem_init(&patients, 0, 0);
-    sem_init(&doctors, 0, M);
-    sem_init(&queue_mutex, 0, 1);
+    Sem_init(&max_patients, 0, N);
+    Sem_init(&mutex_doctor, 0, 1);
+    Sem_init(&mutex_patient, 0, 1);
+    Sem_init(&patients, 0, 0);
+    Sem_init(&doctors, 0, M);
+    Sem_init(&queue_mutex, 0, 1);
     
     for(int i = 0; i < M; i++) {
         DState[i] = 0;

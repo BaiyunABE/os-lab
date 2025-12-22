@@ -41,6 +41,13 @@ void Pthread_join(pthread_t thread, void **retval) {
     }
 }
 
+void Sem_init(sem_t *sem, int pshared, unsigned int value) {
+    int rv = sem_init(sem, pshared, value);
+    if (rv != 0) {
+        perror("sem_init");
+    }
+}
+
 void use_resources(int pid, int iteration) {
     printf("Process P%d (iteration %d) using 1 page and 1 I/O device\n", 
            pid + 1, iteration + 1);
@@ -155,8 +162,8 @@ int main() {
     printf("Process Multi-Resource Allocation System\n");
     printf("========================================\n\n");
     
-    sem_init(&resource_mutex, 0, 1);
-    sem_init(&wait_sem, 0, 0);
+    Sem_init(&resource_mutex, 0, 1);
+    Sem_init(&wait_sem, 0, 0);
     
     run_processes(3);
     
