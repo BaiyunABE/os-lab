@@ -14,6 +14,15 @@ pid_t Fork(void) {
     return rv;
 }
 
+pid_t Wait(int *wstatus) {
+    pid_t pid = wait(wstatus);
+    if (rv == -1) {
+        perror("wait");
+        exit(EXIT_FAILURE);
+    }
+    return pid;
+}
+
 int Kill(pid_t pid, int sig) {
     int rv = kill(pid, sig);
     if (rv == -1) {
@@ -67,8 +76,8 @@ int main() {
     Kill(pid1, 16);
     Kill(pid2, 17);
     
-    wait(NULL);
-    wait(NULL);
+    Wait(NULL);
+    Wait(NULL);
     
     printf("Parent Process is Killed!\n");
     return EXIT_SUCCESS;

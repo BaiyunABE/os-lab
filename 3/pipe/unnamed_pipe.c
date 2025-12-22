@@ -17,6 +17,15 @@ pid_t Fork(void) {
     return rv;
 }
 
+pid_t Wait(int *wstatus) {
+    pid_t pid = wait(wstatus);
+    if (rv == -1) {
+        perror("wait");
+        exit(EXIT_FAILURE);
+    }
+    return pid;
+}
+
 int Pipe(int pipefd[2]) {
     int rv = pipe(pipefd);
     if (rv == -1) {
@@ -68,7 +77,7 @@ int main() {
         
         close(fd[1]);
         
-        wait(NULL);
+        Wait(NULL);
         
         memset(buffer, 0, BUFFER_SIZE);
         length = read(fd[0], buffer, BUFFER_SIZE);

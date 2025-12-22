@@ -28,6 +28,15 @@ pid_t Fork(void) {
     return rv;
 }
 
+pid_t Wait(int *wstatus) {
+    pid_t pid = wait(wstatus);
+    if (rv == -1) {
+        perror("wait");
+        exit(EXIT_FAILURE);
+    }
+    return pid;
+}
+
 int Shmget(key_t key, size_t size, int shmflg) {
     int rv = shmget(key, size, shmflg);
     if (rv == -1) {
@@ -160,7 +169,7 @@ int main() {
         reader_process();
     } else {
         writer_process();
-        wait(NULL);
+        Wait(NULL);
         Shmctl(shmid, IPC_RMID, NULL);
         printf("main process: remove shared memory success\n");
     }

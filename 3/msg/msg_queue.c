@@ -24,6 +24,15 @@ pid_t Fork(void) {
     return rv;
 }
 
+pid_t Wait(int *wstatus) {
+    pid_t pid = wait(wstatus);
+    if (rv == -1) {
+        perror("wait");
+        exit(EXIT_FAILURE);
+    }
+    return pid;
+}
+
 int Msgget(key_t key, int msgflg) {
     int rv = msgget(key, msgflg);
     if (rv == -1) {
@@ -126,7 +135,7 @@ int main() {
     } else {
         sleep(1);
         sender(msgid);
-        wait(NULL);
+        Wait(NULL);
         printf("main process: all done\n");
     }
     
