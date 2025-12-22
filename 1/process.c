@@ -35,6 +35,15 @@ void Execve(const char *pathname, char *const argv[], char *const envp[]) {
     }
 }
 
+pid_t Waitpid(pid_t pid, int *wstatus, int options) {
+    pid_t pid = waitpid(pid, wstatus, options)
+    if (rv == -1) {
+        perror("waitpid");
+        exit(EXIT_FAILURE);
+    }
+    return pid;
+}
+
 int Kill(pid_t pid, int sig) {
     int rv = kill(pid, sig);
     if (rv == -1) {
@@ -113,7 +122,7 @@ void test_fork() {
         printf("process(PID=%d) create child process(PID=%d)\n", getpid(), pid);
         
         int status;
-        waitpid(pid, &status, 0);
+        Waitpid(pid, &status, 0);
         if (WIFEXITED(status)) {
             printf("child process(PID=%d) is exit, return %d\n", pid, WEXITSTATUS(status));
         }
@@ -137,7 +146,7 @@ void test_clone() {
     if (pid > 0) {
         printf("process(PID=%d) create child process(PID=%d)\n", getpid(), pid);
         int status;
-        waitpid(pid, &status, 0);
+        Waitpid(pid, &status, 0);
         if (WIFEXITED(status)) {
             printf("child process(PID=%d) is exit, return %d\n", pid, WEXITSTATUS(status));
         }
@@ -153,7 +162,7 @@ void test_clone() {
     if (pid > 0) {
         printf("process(PID=%d) create child process(PID=%d)\n", getpid(), pid);
         int status;
-        waitpid(pid, &status, 0);
+        Waitpid(pid, &status, 0);
     }
     
     printf("\n3. set CLONE_VFORK:\n");
@@ -166,7 +175,7 @@ void test_clone() {
     if (pid > 0) {
         printf("process(PID=%d) create child process(PID=%d)\n", getpid(), pid);
         int status;
-        waitpid(pid, &status, 0);
+        Waitpid(pid, &status, 0);
     }
     
     printf("\n4. set CLONE_VM(share memory)\n");
@@ -179,7 +188,7 @@ void test_clone() {
     if (pid > 0) {
         printf("process(PID=%d) create child process(PID=%d)\n", getpid(), pid);
         int status;
-        waitpid(pid, &status, 0);
+        Waitpid(pid, &status, 0);
     }
 }
 
@@ -207,7 +216,7 @@ void test_exec() {
         printf("kill success\n");
         
         int status;
-        waitpid(pid, &status, 0);
+        Waitpid(pid, &status, 0);
         if (WIFSIGNALED(status)) {
             printf("child process(PID=%d) is killed by signal %d\n", pid, WTERMSIG(status));
         }
@@ -240,7 +249,7 @@ void test_kill() {
         kill(pid, SIGKILL);
         
         int status;
-        waitpid(pid, &status, 0);
+        Waitpid(pid, &status, 0);
         if (WIFSIGNALED(status)) {
             printf("child process(PID=%d) is killed by signal %d\n", pid, WTERMSIG(status));
         }
