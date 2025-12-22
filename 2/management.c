@@ -17,6 +17,13 @@ void Pthread_create(pthread_t *thread, const pthread_attr_t *attr, void *(*start
     }
 }
 
+void Pthread_cancel(pthread_t thread) {
+    int rv = pthread_cancel(thread);
+    if (rv != 0) {
+        posix_error(rv, "pthread_cancel");
+    }
+}
+
 void* thread_func1(void* arg);
 void* thread_func2(void* arg);
 void* thread_func3(void* arg);
@@ -49,10 +56,7 @@ void thread_management() {
     usleep(rand() % 200 * 1000);
     
     printf("\nmain thread start to cancel thread 3...\n");
-    rc = pthread_cancel(thread3);
-    if (rc == 0) {
-        printf("cancel request is sent to thread 3\n");
-    }
+    Pthread_cancel(thread3);
     
     usleep(rand() % 200 * 1000);
     
