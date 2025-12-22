@@ -28,7 +28,7 @@ int Clone(int (*fn)(void *), void *stack, int flags, void *arg) {
 }
 
 void Execve(const char *pathname, char *const argv[], char *const envp[]) {
-    int rv = execve(const char *pathname, char *const argv[], char *const envp[])
+    int rv = execve(pathname, argv, envp);
     if (rv == -1) {
         perror("execve");
         exit(EXIT_FAILURE);
@@ -36,12 +36,12 @@ void Execve(const char *pathname, char *const argv[], char *const envp[]) {
 }
 
 pid_t Waitpid(pid_t pid, int *wstatus, int options) {
-    pid_t pid = waitpid(pid, wstatus, options)
+    pid_t rv = waitpid(pid, wstatus, options);
     if (rv == -1) {
         perror("waitpid");
         exit(EXIT_FAILURE);
     }
-    return pid;
+    return rv;
 }
 
 int Kill(pid_t pid, int sig) {
