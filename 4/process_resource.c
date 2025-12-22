@@ -45,6 +45,7 @@ void Sem_init(sem_t *sem, int pshared, unsigned int value) {
     int rv = sem_init(sem, pshared, value);
     if (rv != 0) {
         perror("sem_init");
+        exit(EXIT_FAILURE);
     }
 }
 
