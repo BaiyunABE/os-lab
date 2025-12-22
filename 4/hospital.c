@@ -59,6 +59,14 @@ void Sem_wait(sem_t *sem) {
     }
 }
 
+void Sem_post(sem_t *sem) {
+    int rv = sem_post(sem);
+    if (rv == -1) {
+        perror("sem_post");
+        exit(EXIT_FAILURE);
+    }
+}
+
 void* patient(void* arg) {
     int patient_id = (int)(long)arg;
     
@@ -72,26 +80,26 @@ void* patient(void* arg) {
     Sem_wait(&mutex_patient);
     int my_number = patient_counter++;
     PState[my_number] = 0;
-    sem_post(&mutex_patient);
+    Sem_post(&mutex_patient);
     
     printf("patient %d: get number %d\n", patient_id + 1, my_number + 1);
     
     Sem_wait(&queue_mutex);
     waiting_room[wr_rear] = my_number;
     wr_rear = (wr_rear + 1) % N;
-    sem_post(&queue_mutex);
+    Sem_post(&queue_mutex);
     
-    sem_post(&patients);
+    Sem_post(&patients);
     
     printf("patient %d: waiting\n", patient_id + 1);
     
     while(1) {
         Sem_wait(&mutex_patient);
         if(PState[my_number] == -1) {
-            sem_post(&mutex_patient);
+            Sem_post(&mutex_patient);
             break;
         }
-        sem_post(&mutex_patient);
+        Sem_post(&mutex_patient);
         usleep(100000);
     }
     
@@ -107,7 +115,7 @@ void* doctor(void* arg) {
         Sem_wait(&patients);
         
         if(treated_patients >= N) {
-            sem_post(&patients);
+            Sem_post(&patients);
             break;
         }
         
@@ -115,23 +123,23 @@ void* doctor(void* arg) {
         
         Sem_wait(&queue_mutex);
         if(wr_front == wr_rear) {
-            sem_post(&queue_mutex);
-            sem_post(&doctors);
-            sem_post(&patients);
+            Sem_post(&queue_mutex);
+            Sem_post(&doctors);
+            Sem_post(&patients);
             continue;
         }
         
         int current_patient = waiting_room[wr_front];
         wr_front = (wr_front + 1) % N;
-        sem_post(&queue_mutex);
+        Sem_post(&queue_mutex);
         
         Sem_wait(&mutex_doctor);
         DState[doctor_id] = 1;
-        sem_post(&mutex_doctor);
+        Sem_post(&mutex_doctor);
         
         Sem_wait(&mutex_patient);
         PState[current_patient] = 1;
-        sem_post(&mutex_patient);
+        Sem_post(&mutex_patient);
         
         printf("doctor %d: start treat patient %d\n", doctor_id + 1, current_patient + 1);
         
@@ -143,13 +151,13 @@ void* doctor(void* arg) {
         Sem_wait(&mutex_patient);
         treated_patients++;
         PState[current_patient] = -1;
-        sem_post(&mutex_patient);
+        Sem_post(&mutex_patient);
         
         Sem_wait(&mutex_doctor);
         DState[doctor_id] = 0;
-        sem_post(&mutex_doctor);
+        Sem_post(&mutex_doctor);
         
-        sem_post(&doctors);
+        Sem_post(&doctors);
     }
     
     printf("doctor %d: done\n", doctor_id + 1);
@@ -193,7 +201,7 @@ int main() {
     }
 
     for(int i = 0; i < M - 1; i++) {
-        sem_post(&patients);
+        Sem_post(&patients);
     }
 
     for(int i = 0; i < M; i++) {

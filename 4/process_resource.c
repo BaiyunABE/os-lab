@@ -57,6 +57,14 @@ void Sem_wait(sem_t *sem) {
     }
 }
 
+void Sem_post(sem_t *sem) {
+    int rv = sem_post(sem);
+    if (rv == -1) {
+        perror("sem_post");
+        exit(EXIT_FAILURE);
+    }
+}
+
 void use_resources(int pid, int iteration) {
     printf("Process P%d (iteration %d) using 1 page and 1 I/O device\n", 
            pid + 1, iteration + 1);
@@ -83,7 +91,7 @@ bool try_acquire_resources(int pid, int iteration) {
                available_pages, available_ios);
     }
     
-    sem_post(&resource_mutex);
+    Sem_post(&resource_mutex);
     return acquired;
 }
 
@@ -102,13 +110,13 @@ void release_resources(int pid, int iteration) {
         available_pages--;
         available_ios--;
         waiting_count--;
-        sem_post(&wait_sem);
+        Sem_post(&wait_sem);
     } else {
         printf("  Remaining: %d pages, %d I/O devices\n", 
                available_pages, available_ios);
     }
     
-    sem_post(&resource_mutex);
+    Sem_post(&resource_mutex);
 }
 
 void* process_function(void* arg) {
@@ -128,7 +136,7 @@ void* process_function(void* arg) {
                        pid + 1, iter + 1);
                 printf("  Remaining: %d pages, %d I/O devices\n", 
                        available_pages, available_ios);
-                sem_post(&resource_mutex);
+                Sem_post(&resource_mutex);
                 acquired = true;
             }
         }

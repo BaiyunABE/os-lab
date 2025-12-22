@@ -55,6 +55,14 @@ void Sem_wait(sem_t *sem) {
     }
 }
 
+void Sem_post(sem_t *sem) {
+    int rv = sem_post(sem);
+    if (rv == -1) {
+        perror("sem_post");
+        exit(EXIT_FAILURE);
+    }
+}
+
 void* calc_a(void* arg) {
     struct apple* test = arg;
     unsigned long long sum;
@@ -62,7 +70,7 @@ void* calc_a(void* arg) {
     for (sum = 0; sum < APPLE_MAX_VALUE; sum++) {
         test->a += sum;
     }
-    sem_post(&mutex);
+    Sem_post(&mutex);
     return NULL;
 }
 
@@ -73,7 +81,7 @@ void* calc_b(void* arg) {
     for (sum = 0; sum < APPLE_MAX_VALUE; sum++) {
         test->b += sum;
     }
-    sem_post(&mutex);
+    Sem_post(&mutex);
     return NULL;
 }
 

@@ -63,37 +63,45 @@ void Sem_wait(sem_t *sem) {
     }
 }
 
+void Sem_post(sem_t *sem) {
+    int rv = sem_post(sem);
+    if (rv == -1) {
+        perror("sem_post");
+        exit(EXIT_FAILURE);
+    }
+}
+
 void* workerA(void*) {
     while (1) {
         Sem_wait(&mutexE);
         Sem_wait(&mutexB);
         if (empty >= M1 && empty >= M1 + (N2 - countB)) {
-            sem_post(&mutexB);
+            Sem_post(&mutexB);
 
             empty -= M1;
-            sem_post(&mutexE);
+            Sem_post(&mutexE);
             
             Sem_wait(&mutexA);
             countA += M1;
-            sem_post(&mutexA);
+            Sem_post(&mutexA);
 
             printf("A: put %d A\n", M1);
             
             if (waitingC) {
                 waitingC = false;
                 printf("A: wake C\n");
-                sem_post(&condC);
+                Sem_post(&condC);
             }
             
             if (waitingB) {
                 waitingB = false;
                 printf("A: wake B\n");
-                sem_post(&condB);
+                Sem_post(&condB);
             }
 
         } else {
-            sem_post(&mutexE);
-            sem_post(&mutexB);
+            Sem_post(&mutexE);
+            Sem_post(&mutexB);
 
             waitingA = true;
             printf("A: wait...\n");
@@ -109,32 +117,32 @@ void* workerB(void*) {
         Sem_wait(&mutexE);
         Sem_wait(&mutexA);
         if (empty >= M2 && empty >= M2 + (N1 - countA)) {
-            sem_post(&mutexA);
+            Sem_post(&mutexA);
 
             empty -= M2;
-            sem_post(&mutexE);
+            Sem_post(&mutexE);
             
             Sem_wait(&mutexB);
             countB += M2;
-            sem_post(&mutexB);
+            Sem_post(&mutexB);
             
             printf("B: put %d B\n", M2);
 
             if (waitingC) {
                 waitingC = false;
                 printf("B: wake C\n");
-                sem_post(&condC);
+                Sem_post(&condC);
             }
 
             if (waitingA) {
                 waitingA = false;
                 printf("B: wake A\n");
-                sem_post(&condA);
+                Sem_post(&condA);
             }
 
         } else {
-            sem_post(&mutexE);
-            sem_post(&mutexA);
+            Sem_post(&mutexE);
+            Sem_post(&mutexA);
 
             waitingB = true;
             printf("B: wait...\n");
@@ -153,35 +161,35 @@ void* workerC(void*) {
         Sem_wait(&mutexB);
         if (countA >= N1 && countB >= N2) {
             countA -= N1;
-            sem_post(&mutexA);
+            Sem_post(&mutexA);
 
             countB -= N2;
-            sem_post(&mutexB);
+            Sem_post(&mutexB);
             
             Sem_wait(&mutexE);
             empty += (N1 + N2);
-            sem_post(&mutexE);
+            Sem_post(&mutexE);
 
             printf("C: get %d A and %d B\n", N1, N2);
             
             if (waitingA) {
                 waitingA = false;
                 printf("C: wake A\n");
-                sem_post(&condA);
+                Sem_post(&condA);
             }
 
             if (waitingB) {
                 waitingB = false;
                 printf("C: wake B\n");
-                sem_post(&condB);
+                Sem_post(&condB);
             }
 
             C++;
             printf("C: produce C (%d)\n", C);
             
         } else {
-            sem_post(&mutexB);
-            sem_post(&mutexA);
+            Sem_post(&mutexB);
+            Sem_post(&mutexA);
 
             waitingC = true;
             printf("C: wait...\n");
