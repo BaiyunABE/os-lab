@@ -27,6 +27,13 @@ int Clone(int (*fn)(void *), void *stack, int flags, void *arg) {
     return rv;
 }
 
+void Execve(const char *pathname, char *const argv[], char *const envp[]) {
+    int rv = execve(const char *pathname, char *const argv[], char *const envp[])
+    if (rv == -1) {
+        perror("execve");
+        exit(EXIT_FAILURE);
+    }
+
 int Kill(pid_t pid, int sig) {
     int rv = kill(pid, sig);
     if (rv == -1) {
@@ -188,10 +195,7 @@ void test_exec() {
         delay();
         
         printf("child process exec\n");
-        execve("./process_test", args, env);
-        
-        perror("execve");
-        exit(EXIT_FAILURE);
+        Execve("./process_test", args, env);
     } else {
         printf("process(PID=%d) create child process(PID=%d)\n", getpid(), pid);
         
