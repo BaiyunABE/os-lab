@@ -33,6 +33,7 @@ void Execve(const char *pathname, char *const argv[], char *const envp[]) {
         perror("execve");
         exit(EXIT_FAILURE);
     }
+}
 
 int Kill(pid_t pid, int sig) {
     int rv = kill(pid, sig);
