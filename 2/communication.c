@@ -17,6 +17,13 @@ void Pthread_create(pthread_t *thread, const pthread_attr_t *attr, void *(*start
     }
 }
 
+void Pthread_join(pthread_t thread, void **retval) {
+    int rv = pthread_join(thread, retval);
+    if (rv != 0) {
+        posix_error(rv, "pthread_join");
+    }
+}
+
 char shared_message[100] = "init";
 
 void* communication_thread1(void* arg) {
@@ -63,8 +70,8 @@ void thread_communication() {
     Pthread_create(&comm_thread1, NULL, communication_thread1, (void*)"thread 1");
     Pthread_create(&comm_thread2, NULL, communication_thread2, (void*)"thread 2");
     
-    pthread_join(comm_thread1, &thread1_result);
-    pthread_join(comm_thread2, &thread2_result);
+    Pthread_join(comm_thread1, &thread1_result);
+    Pthread_join(comm_thread2, &thread2_result);
     
     printf("\ncommunication end:\n");
     printf("  thread 1 return: %s\n", (char*)thread1_result);

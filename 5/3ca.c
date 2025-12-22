@@ -31,6 +31,13 @@ void Pthread_create(pthread_t *thread, const pthread_attr_t *attr, void *(*start
     }
 }
 
+void Pthread_join(pthread_t thread, void **retval) {
+    int rv = pthread_join(thread, retval);
+    if (rv != 0) {
+        posix_error(rv, "pthread_join");
+    }
+}
+
 void set_cpu_affinity(pthread_t thread, int cpu_id) {
     cpu_set_t cpuset;
     CPU_ZERO(&cpuset);
@@ -90,9 +97,9 @@ int main() {
     set_cpu_affinity(thread2, 1);
     set_cpu_affinity(thread3, 2);
 
-    pthread_join(thread1, NULL);
-    pthread_join(thread2, NULL);
-    pthread_join(thread3, (void**)&sum);
+    Pthread_join(thread1, NULL);
+    Pthread_join(thread2, NULL);
+    Pthread_join(thread3, (void**)&sum);
 
     printf("%lld\n%lld\n%lld\n", test.a, test.b, sum);
 

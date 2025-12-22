@@ -32,6 +32,13 @@ void Pthread_create(pthread_t *thread, const pthread_attr_t *attr, void *(*start
     }
 }
 
+void Pthread_join(pthread_t thread, void **retval) {
+    int rv = pthread_join(thread, retval);
+    if (rv != 0) {
+        posix_error(rv, "pthread_join");
+    }
+}
+
 void* calc_a(void* arg) {
     struct apple* test = arg;
     unsigned long long sum;
@@ -83,9 +90,9 @@ int main() {
     Pthread_create(&thread2, NULL, calc_b, (void*)&test);
     Pthread_create(&thread3, NULL, calc_orange, (void*)&test1);
 
-    pthread_join(thread1, NULL);
-    pthread_join(thread2, NULL);
-    pthread_join(thread3, (void**)&sum);
+    Pthread_join(thread1, NULL);
+    Pthread_join(thread2, NULL);
+    Pthread_join(thread3, (void**)&sum);
 
     printf("%lld\n%lld\n%lld\n", test.a, test.b, sum);
 

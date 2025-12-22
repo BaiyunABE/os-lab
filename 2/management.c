@@ -24,6 +24,13 @@ void Pthread_cancel(pthread_t thread) {
     }
 }
 
+void Pthread_join(pthread_t thread, void **retval) {
+    int rv = pthread_join(thread, retval);
+    if (rv != 0) {
+        posix_error(rv, "pthread_join");
+    }
+}
+
 void* thread_func1(void* arg);
 void* thread_func2(void* arg);
 void* thread_func3(void* arg);
@@ -63,26 +70,20 @@ void thread_management() {
     printf("\nmain thread is waiting for all subthread...\n");
     
 
-    rc = pthread_join(thread1, &thread1_result);
-    if (rc == 0) {
-        printf("thread 1 is end, return value: %s\n", (char*)thread1_result);
-        free(thread1_result);
-    }
+    Pthread_join(thread1, &thread1_result);
+    printf("thread 1 is end, return value: %s\n", (char*)thread1_result);
+    free(thread1_result);
     
-    rc = pthread_join(thread2, &thread2_result);
-    if (rc == 0) {
-        printf("thread 2 is end, return value: %s\n", (char*)thread2_result);
-        free(thread2_result);
-    }
+    Pthread_join(thread2, &thread2_result);
+    printf("thread 2 is end, return value: %s\n", (char*)thread2_result);
+    free(thread2_result);
     
-    rc = pthread_join(thread3, &thread3_result);
-    if (rc == 0) {
-        if (thread3_result == PTHREAD_CANCELED) {
-            printf("thread 3 is canceled\n");
-        } else {
-            printf("thread 3 is end, return value: %s\n", (char*)thread3_result);
-            free(thread3_result);
-        }
+    Pthread_join(thread3, &thread3_result);
+    if (thread3_result == PTHREAD_CANCELED) {
+        printf("thread 3 is canceled\n");
+    } else {
+        printf("thread 3 is end, return value: %s\n", (char*)thread3_result);
+        free(thread3_result);
     }
     
     printf("all thread is end\n");

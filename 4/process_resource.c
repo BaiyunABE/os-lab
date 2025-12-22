@@ -34,6 +34,13 @@ void Pthread_create(pthread_t *thread, const pthread_attr_t *attr, void *(*start
     }
 }
 
+void Pthread_join(pthread_t thread, void **retval) {
+    int rv = pthread_join(thread, retval);
+    if (rv != 0) {
+        posix_error(rv, "pthread_join");
+    }
+}
+
 void use_resources(int pid, int iteration) {
     printf("Process P%d (iteration %d) using 1 page and 1 I/O device\n", 
            pid + 1, iteration + 1);
@@ -135,7 +142,7 @@ void run_processes(int iterations_per_process) {
     }
     
     for (int i = 0; i < NUM_PROCESSES; i++) {
-        pthread_join(threads[i], NULL);
+        Pthread_join(threads[i], NULL);
     }
     
     printf("\n=== All processes completed ===\n");

@@ -40,6 +40,13 @@ void Pthread_create(pthread_t *thread, const pthread_attr_t *attr, void *(*start
     }
 }
 
+void Pthread_join(pthread_t thread, void **retval) {
+    int rv = pthread_join(thread, retval);
+    if (rv != 0) {
+        posix_error(rv, "pthread_join");
+    }
+}
+
 void* workerA(void*) {
     while (1) {
         sem_wait(&mutexE);
@@ -183,9 +190,9 @@ int main() {
     Pthread_create(&threadB, NULL, workerB, NULL);
     Pthread_create(&threadC, NULL, workerC, NULL);
 
-    pthread_join(threadA, NULL);
-    pthread_join(threadB, NULL);
-    pthread_join(threadC, NULL);
+    Pthread_join(threadA, NULL);
+    Pthread_join(threadB, NULL);
+    Pthread_join(threadC, NULL);
     
     return 0;
 }

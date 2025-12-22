@@ -36,6 +36,13 @@ void Pthread_create(pthread_t *thread, const pthread_attr_t *attr, void *(*start
     }
 }
 
+void Pthread_join(pthread_t thread, void **retval) {
+    int rv = pthread_join(thread, retval);
+    if (rv != 0) {
+        posix_error(rv, "pthread_join");
+    }
+}
+
 void* patient(void* arg) {
     int patient_id = (int)(long)arg;
     
@@ -166,7 +173,7 @@ int main() {
     }
 
     for(int i = 0; i < TOTAL_PATIENTS; i++) {
-        pthread_join(patient_threads[i], NULL);
+        Pthread_join(patient_threads[i], NULL);
     }
 
     for(int i = 0; i < M - 1; i++) {
@@ -174,7 +181,7 @@ int main() {
     }
 
     for(int i = 0; i < M; i++) {
-        pthread_join(doctor_threads[i], NULL);
+        Pthread_join(doctor_threads[i], NULL);
     }
     
     printf("today: %d patient, %d treated\n", 
