@@ -44,13 +44,12 @@ pid_t Waitpid(pid_t pid, int *wstatus, int options) {
     return rv;
 }
 
-int Kill(pid_t pid, int sig) {
+void Kill(pid_t pid, int sig) {
     int rv = kill(pid, sig);
     if (rv == -1) {
         perror("kill");
         exit(EXIT_FAILURE);
     }
-    return rv;
 }
 
 void delay() {

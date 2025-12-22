@@ -23,13 +23,12 @@ pid_t Wait(int *wstatus) {
     return pid;
 }
 
-int Kill(pid_t pid, int sig) {
+void Kill(pid_t pid, int sig) {
     int rv = kill(pid, sig);
     if (rv == -1) {
         perror("kill");
         exit(EXIT_FAILURE);
     }
-    return rv;
 }
 
 void child1_handler(int sig) {
