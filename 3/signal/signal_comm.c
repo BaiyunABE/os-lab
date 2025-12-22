@@ -16,7 +16,7 @@ pid_t Fork(void) {
 
 pid_t Wait(int *wstatus) {
     pid_t pid = wait(wstatus);
-    if (rv == -1) {
+    if (pid == -1) {
         perror("wait");
         exit(EXIT_FAILURE);
     }
