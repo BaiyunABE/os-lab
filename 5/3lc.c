@@ -48,10 +48,18 @@ void Sem_init(sem_t *sem, int pshared, unsigned int value) {
     }
 }
 
+void Sem_wait(sem_t *sem) {
+    int rv = sem_wait(sem);
+    if (rv == -1) {
+        perror("sem_wait");
+        exit(EXIT_FAILURE);
+    }
+}
+
 void* calc_a(void* arg) {
     struct apple* test = arg;
     unsigned long long sum;
-    sem_wait(&mutex);
+    Sem_wait(&mutex);
     for (sum = 0; sum < APPLE_MAX_VALUE; sum++) {
         test->a += sum;
     }
@@ -62,7 +70,7 @@ void* calc_a(void* arg) {
 void* calc_b(void* arg) {
     struct apple* test = arg;
     unsigned long long sum;
-    sem_wait(&mutex);
+    Sem_wait(&mutex);
     for (sum = 0; sum < APPLE_MAX_VALUE; sum++) {
         test->b += sum;
     }

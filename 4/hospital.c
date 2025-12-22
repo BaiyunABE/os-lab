@@ -51,6 +51,14 @@ void Sem_init(sem_t *sem, int pshared, unsigned int value) {
     }
 }
 
+void Sem_wait(sem_t *sem) {
+    int rv = sem_wait(sem);
+    if (rv == -1) {
+        perror("sem_wait");
+        exit(EXIT_FAILURE);
+    }
+}
+
 void* patient(void* arg) {
     int patient_id = (int)(long)arg;
     
@@ -61,14 +69,14 @@ void* patient(void* arg) {
         return NULL;
     }
     
-    sem_wait(&mutex_patient);
+    Sem_wait(&mutex_patient);
     int my_number = patient_counter++;
     PState[my_number] = 0;
     sem_post(&mutex_patient);
     
     printf("patient %d: get number %d\n", patient_id + 1, my_number + 1);
     
-    sem_wait(&queue_mutex);
+    Sem_wait(&queue_mutex);
     waiting_room[wr_rear] = my_number;
     wr_rear = (wr_rear + 1) % N;
     sem_post(&queue_mutex);
@@ -78,7 +86,7 @@ void* patient(void* arg) {
     printf("patient %d: waiting\n", patient_id + 1);
     
     while(1) {
-        sem_wait(&mutex_patient);
+        Sem_wait(&mutex_patient);
         if(PState[my_number] == -1) {
             sem_post(&mutex_patient);
             break;
@@ -96,16 +104,16 @@ void* doctor(void* arg) {
     int doctor_id = (int)(long)arg;
     
     while(treated_patients < N) {
-        sem_wait(&patients);
+        Sem_wait(&patients);
         
         if(treated_patients >= N) {
             sem_post(&patients);
             break;
         }
         
-        sem_wait(&doctors);
+        Sem_wait(&doctors);
         
-        sem_wait(&queue_mutex);
+        Sem_wait(&queue_mutex);
         if(wr_front == wr_rear) {
             sem_post(&queue_mutex);
             sem_post(&doctors);
@@ -117,11 +125,11 @@ void* doctor(void* arg) {
         wr_front = (wr_front + 1) % N;
         sem_post(&queue_mutex);
         
-        sem_wait(&mutex_doctor);
+        Sem_wait(&mutex_doctor);
         DState[doctor_id] = 1;
         sem_post(&mutex_doctor);
         
-        sem_wait(&mutex_patient);
+        Sem_wait(&mutex_patient);
         PState[current_patient] = 1;
         sem_post(&mutex_patient);
         
@@ -132,12 +140,12 @@ void* doctor(void* arg) {
         
         printf("doctor %d: complete treat patient %d\n", doctor_id + 1, current_patient + 1);
         
-        sem_wait(&mutex_patient);
+        Sem_wait(&mutex_patient);
         treated_patients++;
         PState[current_patient] = -1;
         sem_post(&mutex_patient);
         
-        sem_wait(&mutex_doctor);
+        Sem_wait(&mutex_doctor);
         DState[doctor_id] = 0;
         sem_post(&mutex_doctor);
         

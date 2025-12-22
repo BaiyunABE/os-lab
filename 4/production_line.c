@@ -55,17 +55,25 @@ void Sem_init(sem_t *sem, int pshared, unsigned int value) {
     }
 }
 
+void Sem_wait(sem_t *sem) {
+    int rv = sem_wait(sem);
+    if (rv == -1) {
+        perror("sem_wait");
+        exit(EXIT_FAILURE);
+    }
+}
+
 void* workerA(void*) {
     while (1) {
-        sem_wait(&mutexE);
-        sem_wait(&mutexB);
+        Sem_wait(&mutexE);
+        Sem_wait(&mutexB);
         if (empty >= M1 && empty >= M1 + (N2 - countB)) {
             sem_post(&mutexB);
 
             empty -= M1;
             sem_post(&mutexE);
             
-            sem_wait(&mutexA);
+            Sem_wait(&mutexA);
             countA += M1;
             sem_post(&mutexA);
 
@@ -89,7 +97,7 @@ void* workerA(void*) {
 
             waitingA = true;
             printf("A: wait...\n");
-            sem_wait(&condA);
+            Sem_wait(&condA);
             printf("A: continue\n");
         }
     }
@@ -98,15 +106,15 @@ void* workerA(void*) {
 
 void* workerB(void*) {
     while (1) {
-        sem_wait(&mutexE);
-        sem_wait(&mutexA);
+        Sem_wait(&mutexE);
+        Sem_wait(&mutexA);
         if (empty >= M2 && empty >= M2 + (N1 - countA)) {
             sem_post(&mutexA);
 
             empty -= M2;
             sem_post(&mutexE);
             
-            sem_wait(&mutexB);
+            Sem_wait(&mutexB);
             countB += M2;
             sem_post(&mutexB);
             
@@ -130,7 +138,7 @@ void* workerB(void*) {
 
             waitingB = true;
             printf("B: wait...\n");
-            sem_wait(&condB);
+            Sem_wait(&condB);
             printf("B: continue\n");
         }
     }
@@ -141,8 +149,8 @@ void* workerC(void*) {
     int C = 0;
     
     while (1) {
-        sem_wait(&mutexA);
-        sem_wait(&mutexB);
+        Sem_wait(&mutexA);
+        Sem_wait(&mutexB);
         if (countA >= N1 && countB >= N2) {
             countA -= N1;
             sem_post(&mutexA);
@@ -150,7 +158,7 @@ void* workerC(void*) {
             countB -= N2;
             sem_post(&mutexB);
             
-            sem_wait(&mutexE);
+            Sem_wait(&mutexE);
             empty += (N1 + N2);
             sem_post(&mutexE);
 
@@ -177,7 +185,7 @@ void* workerC(void*) {
 
             waitingC = true;
             printf("C: wait...\n");
-            sem_wait(&condC);
+            Sem_wait(&condC);
             printf("C: continue\n");
         }
     }

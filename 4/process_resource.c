@@ -49,6 +49,14 @@ void Sem_init(sem_t *sem, int pshared, unsigned int value) {
     }
 }
 
+void Sem_wait(sem_t *sem) {
+    int rv = sem_wait(sem);
+    if (rv == -1) {
+        perror("sem_wait");
+        exit(EXIT_FAILURE);
+    }
+}
+
 void use_resources(int pid, int iteration) {
     printf("Process P%d (iteration %d) using 1 page and 1 I/O device\n", 
            pid + 1, iteration + 1);
@@ -57,7 +65,7 @@ void use_resources(int pid, int iteration) {
 bool try_acquire_resources(int pid, int iteration) {
     bool acquired = false;
     
-    sem_wait(&resource_mutex);
+    Sem_wait(&resource_mutex);
     
     if (available_pages >= 1 && available_ios >= 1) {
         available_pages--;
@@ -80,7 +88,7 @@ bool try_acquire_resources(int pid, int iteration) {
 }
 
 void release_resources(int pid, int iteration) {
-    sem_wait(&resource_mutex);
+    Sem_wait(&resource_mutex);
     
     available_pages++;
     available_ios++;
@@ -114,8 +122,8 @@ void* process_function(void* arg) {
             acquired = try_acquire_resources(pid, iter);
             
             if (!acquired) {
-                sem_wait(&wait_sem);
-                sem_wait(&resource_mutex);
+                Sem_wait(&wait_sem);
+                Sem_wait(&resource_mutex);
                 printf("Process P%d (iteration %d) acquired resources after waiting\n",
                        pid + 1, iter + 1);
                 printf("  Remaining: %d pages, %d I/O devices\n", 
