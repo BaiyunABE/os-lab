@@ -86,24 +86,18 @@ void* workerA(void*) {
             Sem_post(&mutexA);
 
             printf("A: put %d A\n", M1);
-            
-            if (waitingC) {
-                waitingC = false;
-                printf("A: wake C\n");
-                Sem_post(&condC);
-            }
-            
-            if (waitingB) {
-                waitingB = false;
-                printf("A: wake B\n");
-                Sem_post(&condB);
-            }
-
         } else {
             Sem_post(&mutexE);
             Sem_post(&mutexB);
 
             waitingA = true;
+
+            if (waitingC) {
+                waitingC = false;
+                printf("A: wake C\n");
+                Sem_post(&condC);
+            }
+
             printf("A: wait...\n");
             Sem_wait(&condA);
             printf("A: continue\n");
@@ -127,6 +121,11 @@ void* workerB(void*) {
             Sem_post(&mutexB);
             
             printf("B: put %d B\n", M2);
+        } else {
+            Sem_post(&mutexE);
+            Sem_post(&mutexA);
+            
+            waitingB = true;
 
             if (waitingC) {
                 waitingC = false;
@@ -134,17 +133,6 @@ void* workerB(void*) {
                 Sem_post(&condC);
             }
 
-            if (waitingA) {
-                waitingA = false;
-                printf("B: wake A\n");
-                Sem_post(&condA);
-            }
-
-        } else {
-            Sem_post(&mutexE);
-            Sem_post(&mutexA);
-
-            waitingB = true;
             printf("B: wait...\n");
             Sem_wait(&condB);
             printf("B: continue\n");
@@ -154,15 +142,15 @@ void* workerB(void*) {
 }
 
 void* workerC(void*) {
-    int C = 0;
+    unsigned long long C = 0;
     
     while (1) {
-        Sem_wait(&mutexA);
-        Sem_wait(&mutexB);
         if (countA >= N1 && countB >= N2) {
+            Sem_wait(&mutexA);
             countA -= N1;
             Sem_post(&mutexA);
 
+            Sem_wait(&mutexB);
             countB -= N2;
             Sem_post(&mutexB);
             
@@ -185,13 +173,23 @@ void* workerC(void*) {
             }
 
             C++;
-            printf("C: produce C (%d)\n", C);
+            printf("C: produce C (%llu)\n", C);
             
         } else {
-            Sem_post(&mutexB);
-            Sem_post(&mutexA);
-
             waitingC = true;
+
+            if (countA < N1 && waitingA) {
+                waitingA = false;
+                printf("C: wake A\n");
+                Sem_post(&condA);
+            }
+
+            if (countB < N2 && waitingB) {
+                waitingB = false;
+                printf("C: wake B\n");
+                Sem_post(&condB);
+            }
+
             printf("C: wait...\n");
             Sem_wait(&condC);
             printf("C: continue\n");
@@ -213,6 +211,11 @@ int main() {
     Pthread_create(&threadA, NULL, workerA, NULL);
     Pthread_create(&threadB, NULL, workerB, NULL);
     Pthread_create(&threadC, NULL, workerC, NULL);
+
+    while (1) {
+        printf("%d %d %d\n", countA, countB, empty);
+        sleep(1);
+    }
 
     Pthread_join(threadA, NULL);
     Pthread_join(threadB, NULL);
